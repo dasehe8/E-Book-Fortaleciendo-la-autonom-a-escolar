@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Book | Planifico, organizo y aprendo: fortaleciendo la autonomía escolar</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Tipografía Editorial Profesional (Merriweather + Plus Jakarta Sans) -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tone.js para efecto sonoro sutil de paso de página -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-serif-editorial {
+            font-family: 'Merriweather', serif;
+        }
+
+        /* Escenario 3D para efecto realista de libro editorial */
+        .book-viewport {
+            perspective: 2400px;
+        }
+        .book-shell {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            box-shadow: 
+                0 25px 50px -12px rgba(15, 23, 42, 0.18),
+                0 0 0 1px rgba(15, 23, 42, 0.06),
+                inset 16px 0 28px -14px rgba(15, 23, 42, 0.14);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        /* Simulación de hojas apiladas en el borde derecho */
+        .book-shell::after {
+            content: "";
+            position: absolute;
+            top: 12px;
+            bottom: 12px;
+            right: -7px;
+            width: 7px;
+            background: repeating-linear-gradient(
+                to right,
+                #ffffff,
+                #ffffff 1px,
+                #cbd5e1 1px,
+                #cbd5e1 2.5px
+            );
+            border-radius: 0 6px 6px 0;
+            box-shadow: 4px 0 10px rgba(15, 23, 42, 0.08);
+            display: none;
+        }
+        @media (min-width: 1024px) {
+            .book-shell::after {
+                display: block;
+            }
+        }
+
+        /* Animaciones suaves de paso de página */
+        .page-section {
+            display: none;
+            transform-origin: left center;
+        }
+        .page-section.active {
+            display: block;
+        }
+        .flip-next {
+            animation: pageFlipNext 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .flip-prev {
+            animation: pageFlipPrev 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes pageFlipNext {
+            0% {
+                opacity: 0;
+                transform: rotateY(-14deg) translateX(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: rotateY(0deg) translateX(0);
+            }
+        }
+        @keyframes pageFlipPrev {
+            0% {
+                opacity: 0;
+                transform: rotateY(14deg) translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: rotateY(0deg) translateX(0);
+            }
+        }
+
+        /* Retícula sutil para infografías y mapas conceptuales */
+        .editorial-grid {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-100 selection:text-slate-900">
+
+    <!-- ENCABEZADO EDITORIAL LIMPIO Y PROFESIONAL -->
+    <header class="bg-[#0f1f3d] text-white sticky top-0 z-50 shadow-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+                <button onclick="toggleDrawer()" class="lg:hidden bg-white/10 hover:bg-white/20 p-2 rounded-lg text-amber-300 transition" aria-label="Abrir índice">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="bg-amber-500/15 border border-amber-400/40 text-amber-300 p-2 rounded-xl">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <span class="text-[11px] uppercase tracking-widest text-amber-300/90 font-semibold block">
+                        Universidad Nacional Abierta y a Distancia • ECEDU
+                    </span>
+                    <h1 class="text-sm sm:text-base font-bold tracking-tight text-white">
+                        Planifico, organizo y aprendo: fortaleciendo la autonomía escolar
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Indicador de Capítulo Actual -->
+            <div class="hidden sm:flex items-center gap-3">
+                <span class="text-xs text-slate-300 font-medium">E-Book Pedagógico Interactivo</span>
+                <span id="header-page-pill" class="bg-white/10 border border-white/15 text-amber-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    Pág. 1 / 11
+                </span>
+            </div>
+        </div>
+
+        <!-- Barra de progreso de lectura -->
+        <div class="w-full bg-slate-900 h-1">
+            <div id="progress-bar" class="bg-gradient-to-r from-amber-400 to-teal-400 h-1 transition-all duration-500" style="width: 9.09%"></div>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL DEL LIBRO DIGITAL -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 flex flex-col lg:flex-row gap-6">
+
+        <!-- ÍNDICE LATERAL DE CAPÍTULOS -->
+        <aside id="sidebar-toc" class="hidden lg:block lg:w-72 flex-shrink-0">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 sticky top-20">
+                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                        <i data-lucide="bookmark" class="w-4 h-4 text-[#0f1f3d]"></i>
+                        Tabla de Contenido
+                    </span>
+                    <span id="page-indicator-side" class="text-xs font-semibold bg-[#0f1f3d] text-amber-300 px-2.5 py-0.5 rounded-md">1 / 11</span>
+                </div>
+                <nav id="toc-list" class="flex flex-col gap-1 max-h-[74vh] overflow-y-auto pr-1">
+                    <!-- Generado por JS -->
+                </nav>
+            </div>
+        </aside>
+
+        <!-- ESCENARIO DEL LIBRO INTERACTIVO -->
+        <div class="flex-grow book-viewport flex flex-col">
+            <div class="book-shell flex-grow flex flex-col justify-between min-h-[640px] overflow-hidden">
+                
+                <!-- Cornisa superior de página editorial -->
+                <div class="bg-slate-50 border-b border-slate-200/80 px-6 sm:px-8 py-2.5 flex items-center justify-between text-xs text-slate-500">
+                    <span id="running-header" class="font-medium text-slate-600 truncate">Portada • Proyecto Pedagógico de Aprendizaje Autónomo</span>
+                    <span id="page-number-top" class="font-semibold text-slate-700">Página 01 de 11</span>
+                </div>
+
+                <!-- CONTENIDO DE LAS 11 PÁGINAS -->
+                <div class="p-6 sm:p-10 flex-grow">
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 1: PORTADA E IDENTIDAD ACADÉMICA                   -->
+                    <!-- ========================================================= -->
+                    <section id="page-0" class="page-section active">
+                        <div class="bg-gradient-to-br from-slate-50 via-white to-amber-50/40 rounded-2xl p-6 sm:p-8 border border-slate-200/80">
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                                <!-- Columna Izquierda -->
+                                <div class="lg:col-span-7 space-y-5">
+                                    <div class="inline-flex items-center gap-2 bg-[#0f1f3d] text-amber-300 text-xs font-semibold px-3.5 py-1.5 rounded-full">
+                                        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                                        Especialización en Neuropedagogía y Aprendizaje Autónomo
+                                    </div>
+
+                                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0f1f3d] leading-tight">
+                                        E-book Fortaleciendo la autonomía escolar
+                                    </h2>
+
+                                    <p class="text-base sm:text-lg font-medium text-teal-800 border-l-4 border-amber-500 pl-4 py-1 bg-amber-50/60 rounded-r-lg">
+                                        “Planifico, organizo y aprendo: fortaleciendo la autonomía escolar en estudiantes del grado quinto”
+                                    </p>
+
+                                    <div class="text-xs sm:text-sm text-slate-600 space-y-1">
+                                        <p><strong>Contexto:</strong> Institución Educativa Gabriel García Márquez • Comuna 10, Neiva (Huila)</p>
+                                        <p><strong>Programa y Curso:</strong> Escuela de Ciencias de la Educación (ECEDU) • Curso: Aprendizaje Autónomo (Cód. 445006) • 2026</p>
+                                    </div>
+
+                                    <!-- Equipo Colaborativo y Roles -->
+                                    <div class="pt-3 border-t border-slate-200">
+                                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
+                                            <i data-lucide="users" class="w-4 h-4 text-[#0f1f3d]"></i>
+                                            Equipo Investigador y Roles Asignados
+                                        </h3>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                                                <span class="font-semibold text-slate-800">Alexander Trujillo Vargas</span>
+                                                <span class="bg-slate-100 text-[#0f1f3d] font-bold px-2 py-0.5 rounded">Líder</span>
+                                            </div>
+                                            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                                                <span class="font-semibold text-slate-800">Claudia Milena Perdomo Melo</span>
+                                                <span class="bg-teal-50 text-teal-800 font-bold px-2 py-0.5 rounded">Especialista IA</span>
+                                            </div>
+                                            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                                                <span class="font-semibold text-slate-800">Dayana Sepulveda Hernández</span>
+                                                <span class="bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded">Analista Cont.</span>
+                                            </div>
+                                            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                                                <span class="font-semibold text-slate-800">Estefanny Bermúdez Forero</span>
+                                                <span class="bg-indigo-50 text-indigo-800 font-bold px-2 py-0.5 rounded">Eval. Calidad</span>
+                                            </div>
+                                            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between sm:col-span-2">
+                                                <span class="font-semibold text-slate-800">Juan David Lancheros Monje</span>
+                                                <span class="bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded">Documentalista</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Columna Derecha: Ilustración Editorial Vectorial (SVG) -->
+                                <div class="lg:col-span-5 flex flex-col items-center">
+                                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm w-full max-w-sm">
+                                        <svg viewBox="0 0 320 260" class="w-full h-auto" aria-label="Ilustración Ciclo de Autonomía Escolar">
+                                            <rect x="10" y="10" width="300" height="240" rx="18" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+                                            <circle cx="160" cy="125" r="78" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 5"/>
+                                            <circle cx="160" cy="125" r="46" fill="#0f1f3d"/>
+                                            <text x="160" y="121" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="bold">AUTONOMÍA</text>
+                                            <text x="160" y="136" text-anchor="middle" fill="#ffffff" font-size="10">Grado 5.º</text>
+                                            <!-- Nodo 1: Planifico -->
+                                            <rect x="95" y="24" width="130" height="36" rx="10" fill="#0f766e"/>
+                                            <text x="160" y="46" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">1. PLANIFICO</text>
+                                            <!-- Nodo 2: Organizo -->
+                                            <rect x="200" y="168" width="102" height="36" rx="10" fill="#d97706"/>
+                                            <text x="251" y="190" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">2. ORGANIZO</text>
+                                            <!-- Nodo 3: Aprendo -->
+                                            <rect x="18" y="168" width="102" height="36" rx="10" fill="#1e40af"/>
+                                            <text x="69" y="190" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">3. APRENDO</text>
+                                            <text x="160" y="234" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">I.E. Gabriel García Márquez • Neiva</text>
+                                        </svg>
+                                        <div class="mt-3 text-center">
+                                            <button onclick="nextPage()" class="w-full bg-[#0f1f3d] hover:bg-slate-800 text-amber-300 font-semibold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm">
+                                                Iniciar Lectura del E-Book
+                                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 2: FASE 1 — DIAGNÓSTICO Y CONTEXTO ESCOLAR         -->
+                    <!-- ========================================================= -->
+                    <section id="page-1" class="page-section">
+                        <div class="space-y-6">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Fase 1 • Preparación y Diagnóstico</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Caracterización del Contexto y Situación Problemática</h2>
+                            </div>
+
+                            <!-- Caracterización del Entorno -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                    <div class="flex items-center gap-2 text-[#0f1f3d] font-bold text-sm mb-1.5">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-teal-700"></i>
+                                        Ubicación y Entorno
+                                    </div>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        <strong>Institución Educativa Gabriel García Márquez</strong>, ubicada en la <strong>Comuna 10 de Neiva, Huila</strong>. Establecimiento oficial que atiende familias de estratos socioeconómicos 1 y 2.
+                                    </p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                    <div class="flex items-center gap-2 text-[#0f1f3d] font-bold text-sm mb-1.5">
+                                        <i data-lucide="briefcase" class="w-4 h-4 text-amber-600"></i>
+                                        Dinámica Familiar
+                                    </div>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Las familias laboran mayoritariamente en el comercio informal, servicios y oficios independientes, con jornadas extensas que limitan el acompañamiento escolar en casa.
+                                    </p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                    <div class="flex items-center gap-2 text-[#0f1f3d] font-bold text-sm mb-1.5">
+                                        <i data-lucide="users" class="w-4 h-4 text-blue-700"></i>
+                                        Población Sujeto (5.º Grado)
+                                    </div>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Estudiantes de <strong>quinto grado de primaria (10 a 11 años)</strong> en etapa clave de transición hacia la educación secundaria, donde requieren consolidar autonomía académica.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Árbol del Problema -->
+                            <div class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200 editorial-grid space-y-4">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <h3 class="font-bold text-[#0f1f3d] text-sm sm:text-base flex items-center gap-2">
+                                        <i data-lucide="git-branch" class="w-4 h-4 text-teal-700"></i>
+                                        Competencia Intervenida: Planificación y Autorregulación del Tiempo de Estudio Independiente
+                                    </h3>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <!-- Síntomas -->
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-amber-500 shadow-sm">
+                                        <span class="text-xs font-bold uppercase text-amber-700 block mb-2">1. Síntomas Observados</span>
+                                        <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4 leading-relaxed">
+                                            <li>Alto índice de incumplimiento en tareas independientes.</li>
+                                            <li>Improvisación durante las jornadas de estudio en casa.</li>
+                                            <li>Baja persistencia ante actividades escolares complejas.</li>
+                                            <li>Distracción constante con dispositivos electrónicos.</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Causas -->
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-[#0f1f3d] shadow-sm">
+                                        <span class="text-xs font-bold uppercase text-[#0f1f3d] block mb-2">2. Causas Asociadas</span>
+                                        <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4 leading-relaxed">
+                                            <li>Ausencia de hábitos y rutinas de estudio estructuradas.</li>
+                                            <li>Falta de herramientas metacognitivas para dosificar tareas.</li>
+                                            <li>Escaso seguimiento en el hogar por horarios laborales extensos.</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Consecuencias -->
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-rose-700 shadow-sm">
+                                        <span class="text-xs font-bold uppercase text-rose-800 block mb-2">3. Consecuencias a Futuro</span>
+                                        <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4 leading-relaxed">
+                                            <li>Incremento en la frustración escolar y bajo rendimiento.</li>
+                                            <li>Rezago en la agentividad para asumir exigencias del bachillerato.</li>
+                                            <li>Dependencia prolongada de la supervisión adulta.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 3: FASE 1 — ACTIVIDAD METACOGNITIVA Y RETO         -->
+                    <!-- ========================================================= -->
+                    <section id="page-2" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Fase 1 • Diagnóstico Metacognitivo</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Reflexión Metacognitiva del Equipo y Formulación del Reto</h2>
+                            </div>
+
+                            <!-- Acordeón de 5 preguntas metacognitivas -->
+                            <div class="space-y-2.5">
+                                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                    <button onclick="toggleAccordion(0)" class="w-full px-4 py-3 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-[#0f1f3d] hover:bg-slate-50 transition">
+                                        <span>1. ¿Cómo identificaron el problema?</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                                    </button>
+                                    <div id="acc-body-0" class="px-4 pb-3.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5 leading-relaxed">
+                                        A través de la observación directa en la Institución Educativa Gabriel García Márquez y el seguimiento del rendimiento académico en 5.º grado en Neiva, evidenciando que la barrera principal no es la comprensión del contenido, sino la gestión del tiempo y la autoevaluación del estudio independiente.
+                                    </div>
+                                </div>
+
+                                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                    <button onclick="toggleAccordion(1)" class="w-full px-4 py-3 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-[#0f1f3d] hover:bg-slate-50 transition">
+                                        <span>2. ¿Qué criterios usaron para determinar que es relevante?</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                                    </button>
+                                    <div id="acc-body-1" class="hidden px-4 pb-3.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5 leading-relaxed">
+                                        El grado quinto es el umbral previo al bachillerato. Sin habilidades de planificación y autorregulación del tiempo, el estudiante mantiene una dependencia absoluta de la supervisión externa para cumplir sus deberes.
+                                    </div>
+                                </div>
+
+                                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                    <button onclick="toggleAccordion(2)" class="w-full px-4 py-3 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-[#0f1f3d] hover:bg-slate-50 transition">
+                                        <span>3. ¿Qué saben sobre el problema y qué necesitan aprender?</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                                    </button>
+                                    <div id="acc-body-2" class="hidden px-4 pb-3.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5 leading-relaxed">
+                                        Dominamos los referentes teóricos sobre metacognición y autorregulación (Zulma Lanz, Flores-González y Trujillo-Rodríguez). Requerimos traducir esos fundamentos en guías didácticas lúdicas y accesibles para niños de 10 a 11 años.
+                                    </div>
+                                </div>
+
+                                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                    <button onclick="toggleAccordion(3)" class="w-full px-4 py-3 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-[#0f1f3d] hover:bg-slate-50 transition">
+                                        <span>4. ¿Qué fortalezas propias les serán útiles para resolverlo?</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                                    </button>
+                                    <div id="acc-body-3" class="hidden px-4 pb-3.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5 leading-relaxed">
+                                        La apropiación conceptual de los ejes de metacognición, autorregulación y automotivación, sumada al dominio de herramientas tecnoeducativas (Canva y diseño de recursos interactivos) y la capacidad analítica del equipo.
+                                    </div>
+                                </div>
+
+                                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                    <button onclick="toggleAccordion(4)" class="w-full px-4 py-3 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-[#0f1f3d] hover:bg-slate-50 transition">
+                                        <span>5. ¿Qué limitaciones identifican como equipo de trabajo?</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                                    </button>
+                                    <div id="acc-body-4" class="hidden px-4 pb-3.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5 leading-relaxed">
+                                        La coordinación de horarios laborales entre los cinco integrantes para las reuniones sincrónicas y el reto de sintetizar el proyecto pedagógico en un formato E-Book claro y estructurado.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Formulación del Reto -->
+                            <div class="bg-[#0f1f3d] text-white p-5 sm:p-6 rounded-2xl shadow-sm border-l-4 border-amber-400">
+                                <span class="text-xs font-bold uppercase tracking-widest text-amber-300 flex items-center gap-1.5 mb-2">
+                                    <i data-lucide="compass" class="w-4 h-4"></i>
+                                    Formulación del Reto Pedagógico
+                                </span>
+                                <p class="font-serif-editorial text-sm sm:text-lg leading-relaxed text-slate-100">
+                                    “¿Cómo podemos diseñar una propuesta pedagógica innovadora que fortalezca la habilidad de planificación y autorregulación del tiempo de estudio en los estudiantes de 5.º grado de primaria de la Institución Educativa Gabriel García Márquez en Neiva?”
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 4: FASE 2 — ESTRUCTURA DE LA PROPUESTA PEDAGÓGICA  -->
+                    <!-- ========================================================= -->
+                    <section id="page-3" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5 flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Fase 2 • Diseño del Proyecto Pedagógico</span>
+                                    <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Justificación, Propósito y Resultados de Aprendizaje</h2>
+                                </div>
+                                <a href="https://canva.link/bme6ew94tgztsrt" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition">
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                    Explorar Cartilla en Canva
+                                </a>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                    <h3 class="font-bold text-[#0f1f3d] text-sm mb-1.5 flex items-center gap-2">
+                                        <i data-lucide="file-text" class="w-4 h-4 text-teal-700"></i>
+                                        Justificación del Proyecto
+                                    </h3>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Surge de la necesidad de fortalecer la planificación y autorregulación del estudio independiente en quinto grado de la I.E. Gabriel García Márquez (Neiva, Huila), enfrentando las dificultades en organización de tareas, distribución del tiempo y manejo de distractores digitales mediante estrategias lúdicas y participativas basadas en metacognición, autorregulación y automotivación.
+                                    </p>
+                                </div>
+
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                    <h3 class="font-bold text-[#0f1f3d] text-sm mb-1.5 flex items-center gap-2">
+                                        <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+                                        Propósito Formativo General
+                                    </h3>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Fortalecer en los estudiantes de quinto grado de primaria las habilidades de planificación, organización y autorregulación del tiempo de estudio independiente, mediante estrategias pedagógicas lúdicas y metacognitivas que favorezcan la construcción de hábitos de estudio, la autonomía y la responsabilidad frente a sus compromisos académicos.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 3 Resultados de Aprendizaje -->
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">Tres Resultados de Aprendizaje Articulados</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                                        <div>
+                                            <span class="inline-block bg-[#0f1f3d] text-amber-300 text-xs font-bold px-2.5 py-1 rounded-lg mb-2.5">Resultado 1</span>
+                                            <h4 class="font-bold text-slate-900 text-sm mb-1.5">Horarios y Rutinas</h4>
+                                            <p class="text-xs text-slate-600 leading-relaxed">
+                                                Reconocer la importancia de establecer horarios y rutinas que faciliten la organización y distribución del tiempo tanto en actividades escolares dentro del aula como en deberes académicos y extracurriculares.
+                                            </p>
+                                        </div>
+                                        <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-semibold text-teal-700">
+                                            Vinculado a Guía 1: Detectives del tiempo
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                                        <div>
+                                            <span class="inline-block bg-teal-700 text-white text-xs font-bold px-2.5 py-1 rounded-lg mb-2.5">Resultado 2</span>
+                                            <h4 class="font-bold text-slate-900 text-sm mb-1.5">Organización y Seguimiento</h4>
+                                            <p class="text-xs text-slate-600 leading-relaxed">
+                                                Desarrollar estrategias de organización y seguimiento de las actividades escolares que permitan distribuir adecuadamente tiempos de estudio, responder a cada área y cumplir con el plan de estudios de 5.º grado.
+                                            </p>
+                                        </div>
+                                        <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-semibold text-teal-700">
+                                            Vinculado a Guía 2: Escalera de tareas
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                                        <div>
+                                            <span class="inline-block bg-amber-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg mb-2.5">Resultado 3</span>
+                                            <h4 class="font-bold text-slate-900 text-sm mb-1.5">Responsabilidad y Metas</h4>
+                                            <p class="text-xs text-slate-600 leading-relaxed">
+                                                Asumir progresivamente la responsabilidad de su propio aprendizaje mediante la organización del tiempo y el cumplimiento de las metas propuestas.
+                                            </p>
+                                        </div>
+                                        <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-semibold text-teal-700">
+                                            Vinculado a Guía 3: Misión meta cumplida
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 5: MAPA CONCEPTUAL INTERACTIVO DEL MARCO TEÓRICO   -->
+                    <!-- ========================================================= -->
+                    <section id="page-4" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Fundamentación Teórica y Metodológica</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Mapa Conceptual Interactivo: Pilares del Proyecto</h2>
+                            </div>
+
+                            <div class="bg-slate-50 editorial-grid p-5 rounded-2xl border border-slate-200 space-y-5">
+                                <!-- Nodo Central -->
+                                <div class="flex justify-center">
+                                    <div class="bg-[#0f1f3d] text-white px-6 py-3 rounded-2xl shadow-md text-center border-2 border-amber-400">
+                                        <span class="text-[10px] uppercase tracking-widest text-amber-300 font-bold block">Eje Articulador</span>
+                                        <span class="font-bold text-sm sm:text-base">Aprendizaje Autorregulado en Educación Primaria (5.º)</span>
+                                    </div>
+                                </div>
+
+                                <!-- 4 Nodos Interactivos -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                    <button onclick="selectTheoryNode('lanz')" id="node-lanz" class="theory-node text-left p-3.5 rounded-xl bg-white border-2 border-[#0f1f3d] shadow-sm transition">
+                                        <span class="text-[11px] font-bold text-teal-700 block">Referente 1</span>
+                                        <strong class="text-xs sm:text-sm text-slate-900 block mt-0.5">Zulma Lanz (2006)</strong>
+                                        <span class="text-[11px] text-slate-500">Cognición, Metacognición y Motivación</span>
+                                    </button>
+
+                                    <button onclick="selectTheoryNode('flores')" id="node-flores" class="theory-node text-left p-3.5 rounded-xl bg-white border border-slate-200 hover:border-teal-600 shadow-sm transition">
+                                        <span class="text-[11px] font-bold text-teal-700 block">Referente 2</span>
+                                        <strong class="text-xs sm:text-sm text-slate-900 block mt-0.5">Flores & Trujillo (2024)</strong>
+                                        <span class="text-[11px] text-slate-500">Conciencia y Regulación del Aprendizaje</span>
+                                    </button>
+
+                                    <button onclick="selectTheoryNode('inudi')" id="node-inudi" class="theory-node text-left p-3.5 rounded-xl bg-white border border-slate-200 hover:border-teal-600 shadow-sm transition">
+                                        <span class="text-[11px] font-bold text-teal-700 block">Referente 3</span>
+                                        <strong class="text-xs sm:text-sm text-slate-900 block mt-0.5">Inudi Perú (2022)</strong>
+                                        <span class="text-[11px] text-slate-500">Pensamiento Crítico y Lúdica en Primaria</span>
+                                    </button>
+
+                                    <button onclick="selectTheoryNode('paredes')" id="node-paredes" class="theory-node text-left p-3.5 rounded-xl bg-white border border-slate-200 hover:border-teal-600 shadow-sm transition">
+                                        <span class="text-[11px] font-bold text-teal-700 block">Referente 4</span>
+                                        <strong class="text-xs sm:text-sm text-slate-900 block mt-0.5">Paredes et al. (2021)</strong>
+                                        <span class="text-[11px] text-slate-500">Mediación Tecnoeducativa Siglo XXI</span>
+                                    </button>
+                                </div>
+
+                                <!-- Visor Dinámico del Nodo Seleccionado -->
+                                <div id="theory-detail-panel" class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm">
+                                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                        <h4 id="theory-title" class="font-bold text-[#0f1f3d] text-sm sm:text-base">Zulma Lanz (2006) — Aprendizaje Autorregulado</h4>
+                                        <span id="theory-pillar" class="text-xs font-semibold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">Eje: Cognición + Metacognición + Motivación</span>
+                                    </div>
+                                    <p id="theory-desc" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                                        Plantea que aprender autónomamente exige no solo ejecutar tareas académicas, sino comprender cómo se aprende, regular las propias acciones y sostener la motivación intrínseca para alcanzar las metas propuestas.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 3 Orientaciones Metodológicas -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                                    <strong class="text-[#0f1f3d] block mb-1">1. Aprendizaje Activo y Experiencial</strong>
+                                    <p class="text-slate-600">Traslada la elaboración de horarios y organización de rutinas a la cotidianidad escolar del niño.</p>
+                                </div>
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                                    <strong class="text-teal-800 block mb-1">2. Aprendizaje Basado en el Juego</strong>
+                                    <p class="text-slate-600">Integra retos lúdicos contextualizados (Detectives del tiempo, Escalera de tareas y Semáforo).</p>
+                                </div>
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                                    <strong class="text-amber-800 block mb-1">3. Autorregulación Transversal</strong>
+                                    <p class="text-slate-600">Articula planificación, ejecución y reflexión metacognitiva en cada etapa de la cartilla.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 6: DISEÑO DE LAS 3 GUÍAS PEDAGÓGICAS               -->
+                    <!-- ========================================================= -->
+                    <section id="page-5" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Fase 2 • Componente Didáctico Central</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Secuencia de las Tres Guías Pedagógicas</h2>
+                            </div>
+
+                            <!-- Pestañas de selección de Guía -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button onclick="showGuide(1)" id="guide-tab-1" class="p-3.5 rounded-xl border-2 border-[#0f1f3d] bg-slate-50 text-left transition shadow-sm">
+                                    <span class="text-[11px] font-bold uppercase text-teal-700 block">Guía Pedagógica 1</span>
+                                    <span class="font-bold text-sm text-[#0f1f3d]">Detectives del Tiempo</span>
+                                </button>
+                                <button onclick="showGuide(2)" id="guide-tab-2" class="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-slate-400 text-left transition">
+                                    <span class="text-[11px] font-bold uppercase text-slate-500 block">Guía Pedagógica 2</span>
+                                    <span class="font-bold text-sm text-slate-800">Escalera de Tareas y Semáforo</span>
+                                </button>
+                                <button onclick="showGuide(3)" id="guide-tab-3" class="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-slate-400 text-left transition">
+                                    <span class="text-[11px] font-bold uppercase text-slate-500 block">Guía Pedagógica 3</span>
+                                    <span class="font-bold text-sm text-slate-800">Misión Meta Cumplida</span>
+                                </button>
+                            </div>
+
+                            <!-- Contenedor Dinámico de la Guía -->
+                            <div id="guide-content-box" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                                <!-- Renderizado dinámico -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 7: ESTRATEGIAS PARA CUIDAR MI TIEMPO Y SEMÁFORO    -->
+                    <!-- ========================================================= -->
+                    <section id="page-6" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Recursos Didácticos de la Cartilla</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Estrategias para Cuidar mi Tiempo y Semáforo del Tiempo</h2>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                                <!-- 6 Estrategias de la Cartilla -->
+                                <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="font-bold text-[#0f1f3d] text-xs sm:text-sm flex items-center gap-2">
+                                            <span class="bg-[#0f1f3d] text-amber-300 w-5 h-5 rounded-full flex items-center justify-center text-xs">1</span>
+                                            Prioriza tus tareas
+                                        </div>
+                                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Comienza por lo urgente y continúa con lo importante (ej. entregar primero Ciencias que vence mañana).</p>
+                                    </div>
+
+                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="font-bold text-[#0f1f3d] text-xs sm:text-sm flex items-center gap-2">
+                                            <span class="bg-[#0f1f3d] text-amber-300 w-5 h-5 rounded-full flex items-center justify-center text-xs">2</span>
+                                            Divide actividades grandes
+                                        </div>
+                                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Transforma una exposición en 4 pasos secuenciales: elegir tema, buscar información, escribir ideas y ensayar.</p>
+                                    </div>
+
+                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="font-bold text-[#0f1f3d] text-xs sm:text-sm flex items-center gap-2">
+                                            <span class="bg-[#0f1f3d] text-amber-300 w-5 h-5 rounded-full flex items-center justify-center text-xs">3</span>
+                                            Calcula y compara el tiempo
+                                        </div>
+                                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Estima cuánto tardarás (ej. 25 min en Matemáticas, 15 min en lectura) y contrástalo con el tiempo real.</p>
+                                    </div>
+
+                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="font-bold text-[#0f1f3d] text-xs sm:text-sm flex items-center gap-2">
+                                            <span class="bg-[#0f1f3d] text-amber-300 w-5 h-5 rounded-full flex items-center justify-center text-xs">4</span>
+                                            Alterna estudio y pausas
+                                        </div>
+                                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Distribuye bloques de 25 minutos de atención sostenida seguidos de 5 minutos de descanso activo.</p>
+                                    </div>
+
+                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="font-bold text-[#0f1f3d] text-xs sm:text-sm flex items-center gap-2">
+                                            <span class="bg-[#0f1f3d] text-amber-300 w-5 h-5 rounded-full flex items-center justify-center text-xs">5</span>
+                                            Prepara tus materiales
+                                        </div>
+                                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Alista cuadernos, colores, regla y carpeta de Sociales antes de iniciar para evitar interrupciones.</p>
+                                    </div>
+
+                                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="font-bold text-[#0f1f3d] text-xs sm:text-sm flex items-center gap-2">
+                                            <span class="bg-[#0f1f3d] text-amber-300 w-5 h-5 rounded-full flex items-center justify-center text-xs">6</span>
+                                            Controla distractores digitales
+                                        </div>
+                                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">Silencia notificaciones y ubica el teléfono fuera del escritorio hasta concluir la meta acordada.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Herramientas de Autorregulación -->
+                                <div class="lg:col-span-4 space-y-4">
+                                    <!-- Semáforo de Autorregulación -->
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5">
+                                        <h4 class="font-bold text-xs uppercase tracking-wider text-[#0f1f3d]">Semáforo del Tiempo</h4>
+                                        <p class="text-[11px] text-slate-500">Herramienta metacognitiva para que el estudiante monitoree su nivel de atención:</p>
+                                        <div class="flex gap-1.5">
+                                            <button onclick="setTrafficLight('green')" class="flex-1 py-2 rounded-lg bg-teal-700 hover:bg-teal-600 text-white text-xs font-semibold transition">Verde</button>
+                                            <button onclick="setTrafficLight('yellow')" class="flex-1 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-semibold transition">Amarillo</button>
+                                            <button onclick="setTrafficLight('red')" class="flex-1 py-2 rounded-lg bg-rose-700 hover:bg-rose-600 text-white text-xs font-semibold transition">Rojo</button>
+                                        </div>
+                                        <div id="traffic-feedback" class="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200 leading-relaxed">
+                                            <strong class="text-teal-800">Estado Verde:</strong> Estoy concentrado, sigo mi secuencia de pasos y avanzo en mi meta escolar.
+                                        </div>
+                                    </div>
+
+                                    <!-- Aplicación por Áreas de Quinto Grado -->
+                                    <div class="bg-[#0f1f3d] text-white p-4 rounded-2xl space-y-2 text-xs">
+                                        <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300">Aplicación Curricular (5.º)</span>
+                                        <ul class="space-y-1.5 text-slate-200">
+                                            <li><strong>Matemáticas:</strong> Subrayar datos, elegir operación y verificar resultado.</li>
+                                            <li><strong>Lengua:</strong> Leer por partes, anotar vocabulario e idea principal.</li>
+                                            <li><strong>Ciencias:</strong> Dividir exposición en investigar, organizar, crear y ensayar.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 8: TABLERO LÚDICO Y ESTRUCTURA DE PLANIFICACIÓN    -->
+                    <!-- ========================================================= -->
+                    <section id="page-7" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Aprendizaje Basado en el Juego</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Tablero Lúdico y Ruta Universal de Planificación</h2>
+                            </div>
+
+                            <!-- 3 Estaciones Gamificadas (Informativas y Aplicables a Cualquier Tema) -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-slate-50 border border-slate-200 border-t-4 border-t-teal-700 rounded-2xl p-4 space-y-2">
+                                    <span class="text-[11px] font-bold text-teal-700 uppercase">Estación 1 • Resultado 1</span>
+                                    <h3 class="font-bold text-sm text-[#0f1f3d]">Detectives del Tiempo</h3>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        <strong>Propósito:</strong> Reconocer en qué se invierte el tiempo diario y establecer rutinas conscientes.
+                                    </p>
+                                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600 leading-relaxed">
+                                        <strong>Dinámica abierta:</strong> Observar tres momentos de la jornada, estimar su duración y contrastarla con el tiempo real para decidir qué hábito mejorar.
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 border border-slate-200 border-t-4 border-t-blue-700 rounded-2xl p-4 space-y-2">
+                                    <span class="text-[11px] font-bold text-blue-700 uppercase">Estación 2 • Resultado 2</span>
+                                    <h3 class="font-bold text-sm text-[#0f1f3d]">La Escalera de Tareas</h3>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        <strong>Propósito:</strong> Descomponer cualquier actividad compleja en pasos secuenciales y verificables.
+                                    </p>
+                                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600 leading-relaxed">
+                                        <strong>Dinámica abierta:</strong> Elegir un reto escolar de cualquier área, dividirlo en cuatro peldaños ordenados y marcar cada avance alcanzado.
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 border border-slate-200 border-t-4 border-t-amber-600 rounded-2xl p-4 space-y-2">
+                                    <span class="text-[11px] font-bold text-amber-700 uppercase">Estación 3 • Resultado 3</span>
+                                    <h3 class="font-bold text-sm text-[#0f1f3d]">Misión Meta Cumplida</h3>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        <strong>Propósito:</strong> Asumir una meta personal de aprendizaje y evaluar el progreso con autonomía.
+                                    </p>
+                                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600 leading-relaxed">
+                                        <strong>Dinámica abierta:</strong> Formular un objetivo propio, definir los días de dedicación en el calendario y valorar las decisiones tomadas.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Esquema Metodológico Universal del Planificador -->
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <h3 class="font-bold text-[#0f1f3d] text-sm flex items-center gap-2">
+                                        <i data-lucide="layout-list" class="w-4 h-4 text-teal-700"></i>
+                                        Ruta Universal del Planificador Escolar (Aplicable a Cualquier Área y Momento)
+                                    </h3>
+                                    <span class="text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full">Ciclo PAR</span>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    Los formatos de planificación semanal y diaria de la cartilla funcionan como una estructura flexible que el estudiante puede aplicar en cualquier asignatura, proyecto o jornada de estudio independiente:
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                        <strong class="text-[#0f1f3d] block mb-1">1. Antes de Empezar (Planifico)</strong>
+                                        <p class="text-slate-600 leading-relaxed">Definir la meta de la sesión, priorizar la actividad central, alistar los materiales necesarios y resguardar los distractores digitales.</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                        <strong class="text-teal-800 block mb-1">2. Durante la Jornada (Actúo)</strong>
+                                        <p class="text-slate-600 leading-relaxed">Avanzar paso a paso según el tiempo estimado, alternando bloques de concentración con pausas breves de descanso.</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                        <strong class="text-amber-800 block mb-1">3. Al Terminar (Reviso y Ajusto)</strong>
+                                        <p class="text-slate-600 leading-relaxed">Valorar el cumplimiento de la meta, reconocer los logros obtenidos e identificar qué estrategia mejorar en la próxima sesión.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 9: AUTORREGULACIÓN Y AUTOMOTIVACIÓN DEL EQUIPO     -->
+                    <!-- ========================================================= -->
+                    <section id="page-8" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Fases 2 y 3 • Metacognición en la Práctica Docente</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Autorregulación y Automotivación del Equipo Investigador</h2>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                <!-- Autorregulación del Equipo -->
+                                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
+                                    <div class="flex items-center gap-2 text-[#0f1f3d] font-bold text-sm border-b border-slate-200 pb-2.5">
+                                        <i data-lucide="sliders-horizontal" class="w-4 h-4 text-teal-700"></i>
+                                        Proceso de Autorregulación Colaborativa
+                                    </div>
+                                    <div class="space-y-2.5 text-xs">
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">1. Planificación (Viabilidad y Ajustes):</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">El plan se ajustó concentrando la propuesta en tres guías articuladas con los resultados de aprendizaje, evitando dispersión conceptual y adaptando el lenguaje a niños de 10-11 años.</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">2. Monitoreo (Gestión de Interferencias):</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">Para mitigar las limitaciones derivadas de los compromisos laborales de los integrantes, se diseñaron cronogramas de entregas parciales y seguimiento continuo.</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">3. Control y Ejecución (Uso de Recursos):</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">Articulación efectiva de herramientas digitales (Canva y este E-Book interactivo) con los referentes teóricos del curso y la retroalimentación tutorial.</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">4. Evaluación (Síntesis y Jerarquización):</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">Priorización de las ideas clave para asegurar una narrativa coherente, sin redundancias y ajustada al tiempo de presentación de 12 a 15 minutos.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Automotivación del Equipo -->
+                                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
+                                    <div class="flex items-center gap-2 text-[#0f1f3d] font-bold text-sm border-b border-slate-200 pb-2.5">
+                                        <i data-lucide="award" class="w-4 h-4 text-amber-600"></i>
+                                        Reflexión y Automotivación del Equipo
+                                    </div>
+                                    <div class="space-y-2.5 text-xs">
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">1. Propósito e Inspiración Social:</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">Brindar a estudiantes de 5.º grado en Neiva herramientas concretas para tomar decisiones conscientes sobre su aprendizaje y afrontar con éxito el bachillerato.</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">2. Manejo de la Frustración:</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">Comunicación asertiva, redistribución solidaria de responsabilidades y apoyo socioemocional mutuo ante la carga académica y laboral.</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">3. Estrategias de Perseverancia:</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">Reorganización flexible de horarios, acompañamiento entre pares y validación constante de los avances alcanzados en cada etapa.</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                            <strong class="text-[#0f1f3d] block">4. Aprendizajes y Logros Colectivos:</strong>
+                                            <p class="text-slate-600 mt-0.5 leading-relaxed">Vivenciar la autorregulación en nuestro propio proceso universitario, demostrando que la autonomía se construye con acompañamiento y reflexión.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 10: EVALUACIÓN FORMATIVA, CONCLUSIONES Y APA 7     -->
+                    <!-- ========================================================= -->
+                    <section id="page-9" class="page-section">
+                        <div class="space-y-5">
+                            <div class="border-b border-slate-200 pb-3.5">
+                                <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Valoración y Referentes</span>
+                                <h2 class="text-xl sm:text-2xl font-bold text-[#0f1f3d] mt-1">Evaluación Formativa, Conclusiones y Referencias APA 7</h2>
+                            </div>
+
+                            <!-- 4 Dimensiones de Evaluación Formativa -->
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">Cuatro Dimensiones de Valoración Formativa</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                        <strong class="text-[#0f1f3d] block mb-1">1. Planificación</strong>
+                                        <p class="text-slate-600 leading-relaxed">Capacidad para establecer metas, identificar responsabilidades y estructurar horarios.</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                        <strong class="text-[#0f1f3d] block mb-1">2. Organización</strong>
+                                        <p class="text-slate-600 leading-relaxed">Habilidad para priorizar tareas, dosificar actividades y definir secuencias de trabajo.</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                        <strong class="text-[#0f1f3d] block mb-1">3. Autorregulación</strong>
+                                        <p class="text-slate-600 leading-relaxed">Capacidad para supervisar el avance, controlar distractores y ajustar el plan.</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                        <strong class="text-[#0f1f3d] block mb-1">4. Autonomía</strong>
+                                        <p class="text-slate-600 leading-relaxed">Disposición para asumir compromisos, hacer seguimiento y autoevaluar logros.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Conclusiones -->
+                            <div class="bg-[#0f1f3d] text-white p-5 rounded-2xl space-y-2">
+                                <h3 class="font-bold text-amber-300 text-sm flex items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    Conclusiones del Proyecto Pedagógico
+                                </h3>
+                                <p class="text-xs text-slate-200 leading-relaxed">
+                                    • El fortalecimiento del aprendizaje autónomo en quinto grado requiere articular la planificación del tiempo con procesos conscientes de <strong>metacognición, autorregulación y automotivación</strong>.<br>
+                                    • Las estrategias lúdicas (<em>Detectives del tiempo, La escalera de tareas y El semáforo del tiempo</em>) permiten que niños de 10 a 11 años interioricen hábitos de estudio sostenibles.<br>
+                                    • La integración de recursos multimedia y cartillas didácticas favorece la transferencia efectiva entre el sustento neuropedagógico y la práctica escolar cotidiana.
+                                </p>
+                            </div>
+
+                            <!-- Bibliografía APA 7 -->
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                <h4 class="font-bold text-[#0f1f3d] text-xs uppercase tracking-wider mb-2">Referencias Bibliográficas (Normas APA 7.ª Edición)</h4>
+                                <ul class="text-[11px] text-slate-600 space-y-1.5 pl-4 -indent-4 leading-relaxed">
+                                    <li>Bernate, B. S. (2022). <em>OVI Aprendizaje Basado en Problemas</em> [Objeto virtual de información]. Repositorio Institucional UNAD. https://repository.unad.edu.co/handle/10596/50734</li>
+                                    <li>Flores-González, E., & Trujillo-Rodríguez, A. V. (2024). Metacognición y autorregulación del aprendizaje. <em>Revista Fedumar</em>, 11(1), 194–198. https://doi.org/10.31948/fpe.v11i1.4299</li>
+                                    <li>Instituto Universitario de Innovación Ciencia y Tecnología Inudi Perú. (2022). <em>Modelo de estrategias de aprendizaje autónomo para el pensamiento crítico y creativo en estudiantes de educación primaria</em> (pp. 26–47). Editorial Inudi.</li>
+                                    <li>Paredes Paredes, C. E., Campoverde Agurto, M. P., & Játiva Macas, D. F. (2021). Herramientas tecno-educativas del siglo XXI: fortaleciendo competencias digitales docentes para la enseñanza y aprendizaje. <em>Sociedad & Tecnología</em>, 4(S2), 335–349. https://doi.org/10.51247/st.v4iS2.155</li>
+                                    <li>Sáenz Espín, R. E., Medina León, A., Veloz Borja, C. R., & Lucas Mera, L. L. (2024). Influencia del aprendizaje autónomo en la autoestima de los estudiantes de quinto año de básica. <em>Revista UNIANDES Episteme</em>, 11(1), 17–31.</li>
+                                    <li>Zulma Lanz, M. (2006). Aprendizaje autorregulado: el lugar de la cognición, la metacognición y la motivación. <em>Estudios Pedagógicos</em>, 32(2), 121–132. https://www.redalyc.org/articulo.oa?id=173514131006</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ========================================================= -->
+                    <!-- PÁGINA 11: CIERRE Y AGRADECIMIENTO FINAL                  -->
+                    <!-- ========================================================= -->
+                    <section id="page-10" class="page-section">
+                        <div class="bg-gradient-to-br from-slate-50 via-white to-amber-50/40 rounded-2xl p-6 sm:p-10 border border-slate-200/80 flex flex-col items-center text-center justify-center min-h-[500px] space-y-6">
+                            <div class="bg-[#0f1f3d] text-amber-300 p-4 rounded-2xl shadow-md">
+                                <i data-lucide="book-open-check" class="w-10 h-10"></i>
+                            </div>
+
+                            <div class="max-w-2xl space-y-3">
+                                <span class="text-xs font-bold uppercase tracking-widest text-teal-700">Cierre de la Presentación</span>
+                                <h2 class="text-2xl sm:text-3xl font-bold text-[#0f1f3d]">
+                                    ¡Gracias por ver y explorar este E-Book!
+                                </h2>
+                                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                                    “Planificar es preparar el camino; autorregularme es cuidar ese camino; aprender de manera autónoma es avanzar con responsabilidad.”
+                                </p>
+                            </div>
+
+                            <!-- Ideas para recordar de la cartilla -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-3xl text-xs">
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                    <strong class="text-[#0f1f3d] block mb-1">Planifico</strong>
+                                    <span class="text-slate-600">Organizo mis horarios y rutinas de estudio.</span>
+                                </div>
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                    <strong class="text-teal-800 block mb-1">Organizo</strong>
+                                    <span class="text-slate-600">Hago seguimiento paso a paso de mis actividades.</span>
+                                </div>
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                                    <strong class="text-amber-800 block mb-1">Aprendo</strong>
+                                    <span class="text-slate-600">Asumo mis metas y reconozco mis avances.</span>
+                                </div>
+                            </div>
+
+                            <!-- Créditos Institucionales y Equipo -->
+                            <div class="w-full max-w-3xl pt-4 border-t border-slate-200 space-y-3">
+                                <div class="text-xs text-slate-600">
+                                    <strong class="text-[#0f1f3d] block">Universidad Nacional Abierta y a Distancia – UNAD</strong>
+                                    <span>Escuela de Ciencias de la Educación (ECEDU) • Especialización en Neuropedagogía y Aprendizaje Autónomo • Curso: Aprendizaje Autónomo (Código 445006) • 2026</span>
+                                    <span class="block mt-1 text-slate-500">Propuesta pedagógica para estudiantes de quinto grado de la Institución Educativa Gabriel García Márquez, Neiva, Huila.</span>
+                                </div>
+
+                                <div class="flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-700 font-medium">
+                                    <span class="bg-white px-2.5 py-1 rounded-lg border border-slate-200">Alexander Trujillo Vargas</span>
+                                    <span class="bg-white px-2.5 py-1 rounded-lg border border-slate-200">Claudia Milena Perdomo Melo</span>
+                                    <span class="bg-white px-2.5 py-1 rounded-lg border border-slate-200">Dayana Sepulveda Hernández</span>
+                                    <span class="bg-white px-2.5 py-1 rounded-lg border border-slate-200">Estefanny Bermúdez Forero</span>
+                                    <span class="bg-white px-2.5 py-1 rounded-lg border border-slate-200">Juan David Lancheros Monje</span>
+                                </div>
+
+                                <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+                                    <a href="https://canva.link/bme6ew94tgztsrt" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-[#0f1f3d] hover:bg-slate-800 text-amber-300 px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                        Ver Cartilla Pedagógica en Canva
+                                    </a>
+                                    <button onclick="goToPage(0)" class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-xs font-semibold transition">
+                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                        Volver al Inicio
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- BARRA INFERIOR DE NAVEGACIÓN DE PÁGINAS -->
+                <div class="bg-slate-50 border-t border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3">
+                    <button id="btn-prev" onclick="prevPage()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition shadow-sm">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        <span>Anterior</span>
+                    </button>
+
+                    <!-- Indicadores visuales de páginas -->
+                    <div id="dots-container" class="flex items-center gap-1.5 overflow-x-auto py-1">
+                        <!-- Generado por JS -->
+                    </div>
+
+                    <button id="btn-next" onclick="nextPage()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-[#0f1f3d] hover:bg-slate-800 text-amber-300 disabled:opacity-40 disabled:pointer-events-none transition shadow-sm">
+                        <span>Siguiente</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- LÓGICA DE NAVEGACIÓN E INTERACTIVIDAD DEL E-BOOK -->
+    <script>
+        lucide.createIcons();
+
+        // Índice estructurado de los 11 capítulos del E-Book
+        const chapters = [
+            {
+                title: "01. Portada y Autores",
+                subtitle: "Identidad Institucional UNAD",
+                header: "Portada • Proyecto Pedagógico de Aprendizaje Autónomo"
+            },
+            {
+                title: "02. Diagnóstico Escolar",
+                subtitle: "Contexto y Problemática",
+                header: "Fase 1 • Caracterización del Entorno y Árbol del Problema"
+            },
+            {
+                title: "03. Análisis Metacognitivo",
+                subtitle: "Reflexión y Pregunta Reto",
+                header: "Fase 1 • Diagnóstico Metacognitivo y Formulación del Reto"
+            },
+            {
+                title: "04. Propuesta Pedagógica",
+                subtitle: "Justificación y Resultados",
+                header: "Fase 2 • Estructura de la Propuesta y Resultados de Aprendizaje"
+            },
+            {
+                title: "05. Mapa Conceptual",
+                subtitle: "Fundamentación Teórica",
+                header: "Marco Teórico • Mapa Conceptual Interactivo"
+            },
+            {
+                title: "06. Guías Pedagógicas",
+                subtitle: "Secuencia Didáctica (1 a 3)",
+                header: "Fase 2 • Diseño de las Tres Guías Pedagógicas"
+            },
+            {
+                title: "07. Estrategias de Tiempo",
+                subtitle: "Cuidado y Semáforo del Tiempo",
+                header: "Cartilla Didáctica • Estrategias y Semáforo del Tiempo"
+            },
+            {
+                title: "08. Tablero y Ruta PAR",
+                subtitle: "Gamificación y Planificación",
+                header: "Cartilla Didáctica • Tablero Lúdico y Ruta Universal"
+            },
+            {
+                title: "09. Proceso Reflexivo",
+                subtitle: "Autorregulación y Motivación",
+                header: "Fases 2 y 3 • Autorregulación y Automotivación del Equipo"
+            },
+            {
+                title: "10. Evaluación y APA 7",
+                subtitle: "Valoración y Bibliografía",
+                header: "Evaluación Formativa, Conclusiones y Referencias APA 7"
+            },
+            {
+                title: "11. Cierre y Gracias",
+                subtitle: "Agradecimiento Final",
+                header: "Cierre • Gracias por ver el E-Book"
+            }
+        ];
+
+        let currentPage = 0;
+
+        function renderNavigation() {
+            const tocList = document.getElementById('toc-list');
+            const dotsContainer = document.getElementById('dots-container');
+            tocList.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            chapters.forEach((chap, idx) => {
+                const active = idx === currentPage;
+                const btn = document.createElement('button');
+                btn.onclick = () => goToPage(idx);
+                btn.className = `text-left px-3 py-2 rounded-xl transition flex items-center justify-between gap-2 ${
+                    active ? 'bg-[#0f1f3d] text-white shadow-sm' : 'hover:bg-slate-100 text-slate-600'
+                }`;
+                btn.innerHTML = `
+                    <div class="truncate">
+                        <div class="text-xs font-bold truncate ${active ? 'text-amber-300' : 'text-slate-800'}">${chap.title}</div>
+                        <div class="text-[11px] truncate ${active ? 'text-slate-300' : 'text-slate-400'}">${chap.subtitle}</div>
+                    </div>
+                `;
+                tocList.appendChild(btn);
+
+                const dot = document.createElement('button');
+                dot.onclick = () => goToPage(idx);
+                dot.className = `h-2 rounded-full transition-all ${active ? 'w-6 bg-[#0f1f3d]' : 'w-2 bg-slate-300 hover:bg-slate-400'}`;
+                dot.title = chap.title;
+                dotsContainer.appendChild(dot);
+            });
+
+            document.getElementById('page-indicator-side').textContent = `${currentPage + 1} / ${chapters.length}`;
+            document.getElementById('header-page-pill').textContent = `Pág. ${currentPage + 1} / ${chapters.length}`;
+            document.getElementById('page-number-top').textContent = `Página ${String(currentPage + 1).padStart(2, '0')} de ${chapters.length}`;
+            document.getElementById('running-header').textContent = chapters[currentPage].header;
+            document.getElementById('progress-bar').style.width = `${((currentPage + 1) / chapters.length) * 100}%`;
+            document.getElementById('btn-prev').disabled = currentPage === 0;
+            document.getElementById('btn-next').disabled = currentPage === chapters.length - 1;
+        }
+
+        function goToPage(index) {
+            if (index < 0 || index >= chapters.length || index === currentPage) return;
+            const direction = index > currentPage ? 'flip-next' : 'flip-prev';
+            
+            document.querySelectorAll('.page-section').forEach(sec => {
+                sec.classList.remove('active', 'flip-next', 'flip-prev');
+            });
+            
+            const target = document.getElementById(`page-${index}`);
+            target.classList.add('active', direction);
+            
+            currentPage = index;
+            renderNavigation();
+            playPageTurnSound();
+            
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar-toc').classList.add('hidden');
+            }
+        }
+
+        function nextPage() { goToPage(currentPage + 1); }
+        function prevPage() { goToPage(currentPage - 1); }
+
+        function toggleDrawer() {
+            document.getElementById('sidebar-toc').classList.toggle('hidden');
+        }
+
+        // Navegación con flechas del teclado y gestos táctiles
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') prevPage();
+        });
+
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            const diff = e.changedTouches[0].screenX - touchStartX;
+            if (Math.abs(diff) > 65) {
+                if (diff < 0) nextPage();
+                else prevPage();
+            }
+        }, { passive: true });
+
+        // Acordeón Metacognitivo (Página 3)
+        function toggleAccordion(idx) {
+            document.getElementById(`acc-body-${idx}`).classList.toggle('hidden');
+        }
+
+        // Mapa Conceptual Interactivo (Página 5)
+        const theoryNodes = {
+            lanz: {
+                title: "Zulma Lanz (2006) — Aprendizaje Autorregulado",
+                pillar: "Eje: Cognición + Metacognición + Motivación",
+                desc: "Plantea que aprender autónomamente exige no solo ejecutar tareas académicas, sino comprender cómo se aprende, regular las propias acciones y sostener la motivación intrínseca para alcanzar las metas propuestas."
+            },
+            flores: {
+                title: "Flores-González & Trujillo-Rodríguez (2024)",
+                pillar: "Eje: Toma de Conciencia y Regulación",
+                desc: "Fundamentan la metacognición y la autorregulación como procesos conscientes que permiten al estudiante supervisar su comprensión, identificar bloqueos y ajustar sus estrategias de estudio."
+            },
+            inudi: {
+                title: "Instituto Universitario Inudi Perú (2022)",
+                pillar: "Eje: Aprendizaje Basado en el Juego",
+                desc: "Respalda la implementación de estrategias lúdicas en educación primaria para desarrollar el pensamiento crítico y creativo mediante retos como Detectives del tiempo y La escalera de tareas."
+            },
+            paredes: {
+                title: "Paredes et al. (2021) — Herramientas Tecno-Educativas",
+                pillar: "Eje: Mediación Digital con Propósito",
+                desc: "Orienta el uso pertinente de recursos digitales (Canva, planificadores y E-Books interactivos) con finalidad pedagógica clara para potenciar los procesos de enseñanza y aprendizaje."
+            }
+        };
+
+        function selectTheoryNode(key) {
+            document.querySelectorAll('.theory-node').forEach(btn => {
+                btn.className = "theory-node text-left p-3.5 rounded-xl bg-white border border-slate-200 hover:border-teal-600 shadow-sm transition";
+            });
+            document.getElementById(`node-${key}`).className = "theory-node text-left p-3.5 rounded-xl bg-white border-2 border-[#0f1f3d] shadow-sm transition";
+
+            const node = theoryNodes[key];
+            document.getElementById('theory-title').textContent = node.title;
+            document.getElementById('theory-pillar').textContent = node.pillar;
+            document.getElementById('theory-desc').textContent = node.desc;
+        }
+
+        // Visor de las 3 Guías Pedagógicas (Página 6)
+        const guidesData = {
+            1: {
+                badge: "Guía 1 • Resultado de Aprendizaje 1",
+                title: "Detectives del Tiempo",
+                intent: "Favorecer el reconocimiento de hábitos y rutinas cotidianas para que el estudiante identifique cómo distribuye su tiempo y qué situaciones dificultan sus deberes escolares.",
+                contents: "Hábitos y rutinas de estudio • Responsabilidades escolares y personales • Distribución del tiempo • Priorización.",
+                resources: "Humanos: Docente orientador y estudiantes de 5.º. Tecnológicos: Computador y proyector. Materiales: Cartilla pedagógica, hojas de registro, colores y planificador semanal.",
+                activities: "1. Exploración de rutinas cotidianas. 2. Registro y comparación entre tiempo estimado y real. 3. Identificación de factores que favorecen o dificultan. 4. Elaboración de horario semanal. 5. Reflexión.",
+                eval: "Lista de cotejo y autoevaluación sobre el registro de actividades y el horario semanal elaborado."
+            },
+            2: {
+                badge: "Guía 2 • Resultado de Aprendizaje 2",
+                title: "La Escalera de Tareas y el Semáforo del Tiempo",
+                intent: "Desarrollar estrategias para organizar, secuenciar tareas complejas en pasos realizables, estimar tiempos y controlar distractores digitales mediante supervisión activa.",
+                contents: "Planificación de tareas • División en pasos secuenciales • Estimación de tiempo • Control de distractores • Ajuste del plan.",
+                resources: "Humanos: Docente y estudiantes. Tecnológicos: Computador, proyector y herramientas digitales. Materiales: Cartilla, tarjetas de pasos, listas de verificación y planificador diario.",
+                activities: "1. Dividir tarea grande en 4 pasos (Escalera). 2. Priorizar por fecha. 3. Identificar distractores (Semáforo del tiempo). 4. Plan diario de estudio. 5. Seguimiento y ajuste.",
+                eval: "Listas de cotejo y registros de seguimiento de la tarea dividida por pasos, el plan diario y el control de distractores."
+            },
+            3: {
+                badge: "Guía 3 • Resultado de Aprendizaje 3",
+                title: "Misión Meta Cumplida",
+                intent: "Fortalecer la responsabilidad progresiva y la automotivación mediante el establecimiento de metas académicas personales, el seguimiento periódico y la celebración de logros.",
+                contents: "Establecimiento de metas académicas • Responsabilidad y compromiso • Seguimiento de avances • Autoevaluación y persistencia.",
+                resources: "Humanos: Docente y estudiantes. Tecnológicos: Computador y proyector. Materiales: Cartilla pedagógica, calendario de seguimiento, ficha de meta y compromiso personal.",
+                activities: "1. Formular meta personal. 2. Plan de acción. 3. Registro periódico de avances. 4. Alternativas de mejora ante dificultades. 5. Autoevaluación y firma de compromiso.",
+                eval: "Instrumentos de autoevaluación, calendario de avances y compromiso personal firmado."
+            }
+        };
+
+        function showGuide(num) {
+            [1, 2, 3].forEach(n => {
+                const tab = document.getElementById(`guide-tab-${n}`);
+                if (n === num) {
+                    tab.className = "p-3.5 rounded-xl border-2 border-[#0f1f3d] bg-slate-50 text-left transition shadow-sm";
+                } else {
+                    tab.className = "p-3.5 rounded-xl border border-slate-200 bg-white hover:border-slate-400 text-left transition";
+                }
+            });
+
+            const g = guidesData[num];
+            document.getElementById('guide-content-box').innerHTML = `
+                <div class="border-b border-slate-200 pb-3">
+                    <span class="text-xs font-bold uppercase text-teal-700">${g.badge}</span>
+                    <h3 class="text-lg sm:text-xl font-bold text-[#0f1f3d] mt-0.5">${g.title}</h3>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed"><strong>Intencionalidad pedagógica:</strong> ${g.intent}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                        <strong class="text-[#0f1f3d] block mb-1">Contenidos a Desarrollar:</strong>
+                        <p class="text-slate-600 leading-relaxed">${g.contents}</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                        <strong class="text-teal-800 block mb-1">Recursos y Herramientas:</strong>
+                        <p class="text-slate-600 leading-relaxed">${g.resources}</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                        <strong class="text-amber-800 block mb-1">Actividades Pedagógicas:</strong>
+                        <p class="text-slate-600 leading-relaxed">${g.activities}</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                        <strong class="text-indigo-800 block mb-1">Proceso Evaluativo y Evidencias:</strong>
+                        <p class="text-slate-600 leading-relaxed">${g.eval}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Semáforo del Tiempo (Página 7)
+        function setTrafficLight(color) {
+            const fb = document.getElementById('traffic-feedback');
+            if (color === 'green') {
+                fb.innerHTML = "<strong class='text-teal-800'>Estado Verde:</strong> Estoy concentrado, sigo mi secuencia de pasos y avanzo en mi meta escolar.";
+            } else if (color === 'yellow') {
+                fb.innerHTML = "<strong class='text-amber-700'>Estado Amarillo:</strong> Necesito revisar mi plan o tomar una pausa corta de 5 minutos para retomar el enfoque.";
+            } else {
+                fb.innerHTML = "<strong class='text-rose-700'>Estado Rojo:</strong> Estoy muy distraído; detengo la actividad, retiro el distractor digital y reinicio con un paso de 5 minutos.";
+            }
+        }
+
+        // Sonido sutil de paso de página
+        function playPageTurnSound() {
+            try {
+                if (typeof Tone !== 'undefined' && Tone.context.state === 'running') {
+                    const synth = new Tone.MembraneSynth({
+                        pitchDecay: 0.02,
+                        octaves: 1.5,
+                        envelope: { attack: 0.001, decay: 0.07, sustain: 0 }
+                    }).toDestination();
+                    synth.volume.value = -20;
+                    synth.triggerAttackRelease("G3", "32n");
+                }
+            } catch (e) {}
+        }
+
+        document.body.addEventListener('click', () => {
+            if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
+                Tone.start();
+            }
+        }, { once: true });
+
+        // Inicialización
+        renderNavigation();
+        showGuide(1);
+    </script>
+</body>
+</html>
